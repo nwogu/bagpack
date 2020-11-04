@@ -1,0 +1,29 @@
+{
+    "name": "nwogu/bagpack",
+    "description": "Organize your migration files into proper directories by tables",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "migration", "organize migrations", "manage migrations"],
+    "authors": [
+        {
+            "name": "Gabriel Nwogu",
+            "email": "nwogugabriel@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Nwogu\\Bagpack\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nwogu\\Bagpack\\BagpackServiceProvider",
+                "Nwogu\\Bagpack\\MakeMigrationProvider"
+            ]
+        }
+    }
+}

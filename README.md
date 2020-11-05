@@ -8,10 +8,10 @@ trying to figure out all the related migration files specific to a table?
 That's what Bagpack does. It allows you to group your migration files 
 into directories so you can easily find all the histories related to a particular schema table.
 
-#### Before Backpack
+#### Before Bagpack
 ![alt text](before-bagpack.png?raw=true)
 
-#### After Backpack
+#### After Bagpack
 ![alt text](after-bagpack.png?raw=true)
 
 ## Installation.

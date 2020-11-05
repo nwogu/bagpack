@@ -41,7 +41,7 @@ class MigrationPackageCommand extends Command
      */
     public function handle(MigrationTranspiler $transpiler)
     {
-        if ( config('bagpack.run') == false ) {
+        if ( config('bagpack.run') === false ) {
             
             $this->alert("Bagpack disabled! Enable Bagpack to package migration files!");
 

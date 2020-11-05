@@ -3,8 +3,9 @@
 namespace Nwogu\Bagpack;
 
 use Illuminate\Support\ServiceProvider;
+use Nwogu\Bagpack\Console\MigrationPackageCommand;
 
-class BagpackServiceProvidern extends ServiceProvider
+class BagpackServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -13,7 +14,9 @@ class BagpackServiceProvidern extends ServiceProvider
      */
     public function register()
     {
-
+        $this->app->bind(MigrationTranspiler::class, function ($app) {
+            return new MigrationTranspiler($app['migrator']);
+        });
     }
 
     /**
@@ -23,9 +26,19 @@ class BagpackServiceProvidern extends ServiceProvider
      */
     public function boot()
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                MigrationPackageCommand::class
+            ]);
+        }
+
         foreach (glob( $this->getMigrationPathPattern(), GLOB_ONLYDIR) as $migrationDir) {
             $this->app['migrator']->path($migrationDir);
         }
+
+        $this->publishes([
+            __DIR__ . "/../config/bagpack.php"  => config_path('bagpack.php')
+        ], 'bagpack');
     }
 
     /**

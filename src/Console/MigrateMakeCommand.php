@@ -47,7 +47,7 @@ class MigrateMakeCommand extends BaseCommand
 
             $targetPath = "{$targetPath}/{$table}";
 
-            $this->files->ensureDirectoryExists(dirname($targetPath));
+            $this->files->ensureDirectoryExists($targetPath);
         }
 
         $file = $this->creator->create(

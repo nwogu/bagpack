@@ -2,6 +2,7 @@
 
 namespace Nwogu\Bagpack;
 
+use Throwable;
 use ReflectionMethod;
 use Illuminate\Database\Migrations\Migrator;
 
@@ -41,7 +42,12 @@ class MigrationTranspiler
     {
         $this->migrator->requireFiles([$file]);
         $name = key($this->migrator->getMigrationFiles($file));
-        $this->migration = $this->migrator->resolve( $this->migrator->getMigrationName($name) );
+
+        try {
+            $this->migration = $this->migrator->resolve( $this->migrator->getMigrationName($name) );
+        } catch (Throwable $exception) {
+            $this->migration = null;
+        }
 
         return $this;
     }
@@ -79,6 +85,8 @@ class MigrationTranspiler
      */
     public function findTableName()
     {
+        if ($this->migration === null) return null;
+
         preg_match("/(?<=Schema::create\(').*?(?=',)/", $this->getBody("up"), $create);
         preg_match("/(?<=Schema::table\(').*?(?=',)/", $this->getBody("up"), $table);
         

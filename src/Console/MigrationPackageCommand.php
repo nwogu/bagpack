@@ -6,10 +6,13 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Nwogu\Bagpack\MigrationTranspiler;
 use Illuminate\Database\Migrations\Migrator;
+use Nwogu\Bagpack\Traits\InteractsWithFiles;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
 class MigrationPackageCommand extends Command
 {
+    use InteractsWithFiles;
+    
     /**
      * The name and signature of the console command.
      *
@@ -41,20 +44,13 @@ class MigrationPackageCommand extends Command
      */
     public function handle(MigrationTranspiler $transpiler)
     {
-        if ( config('bagpack.run') === false ) {
-            
-            $this->alert("Bagpack disabled! Enable Bagpack to package migration files!");
-
-            return 0;
-        }
-
         $this->getMigrationFiles()->map(function ($path, $name) use ($transpiler) {
 
             $targetPath = $this->getTableMigrationPath($name, $path, $transpiler);
 
             $this->info("Moving $name from $path to $targetPath");
 
-            $this->laravel->files->ensureDirectoryExists(dirname($targetPath));
+            $this->ensureDirectoryExists($this->laravel->files, dirname($targetPath));
 
             $this->laravel->files->move($path, $targetPath);
         });

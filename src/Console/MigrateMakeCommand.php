@@ -4,11 +4,14 @@ namespace Nwogu\Bagpack\Console;
 
 use Illuminate\Support\Composer;
 use Illuminate\Filesystem\Filesystem;
+use Nwogu\Bagpack\Traits\InteractsWithFiles;
 use Illuminate\Database\Migrations\MigrationCreator;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand as BaseCommand;
 
 class MigrateMakeCommand extends BaseCommand
 {
+    use InteractsWithFiles;
+    
     /**
      * The Filesystem
      *
@@ -47,7 +50,7 @@ class MigrateMakeCommand extends BaseCommand
 
             $targetPath = "{$targetPath}/{$table}";
 
-            $this->files->ensureDirectoryExists($targetPath);
+            $this->ensureDirectoryExists($this->files, $targetPath);
         }
 
         $file = $this->creator->create(

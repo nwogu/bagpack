@@ -4,10 +4,13 @@ namespace Nwogu\Bagpack;
 
 use Nwogu\Bagpack\Extensions\Migrator;
 use Illuminate\Support\ServiceProvider;
+use Nwogu\Bagpack\Traits\HandlesMigrationFiles;
 use Nwogu\Bagpack\Console\MigrationPackageCommand;
 
 class BagpackServiceProvider extends ServiceProvider
 {
+    use HandlesMigrationFiles;
+    
     /**
      * Register any application services.
      *
@@ -42,24 +45,12 @@ class BagpackServiceProvider extends ServiceProvider
             ]);
         }
 
-        foreach (glob( $this->getMigrationPathPattern(), GLOB_ONLYDIR) as $migrationDir) {
+        foreach ($this->getMigrationFilesRecursively() as $migrationDir) {
             $this->app['migrator']->path($migrationDir);
         }
 
         $this->publishes([
             __DIR__ . "/../config/bagpack.php"  => config_path('bagpack.php')
         ], 'bagpack');
-    }
-
-    /**
-     * Get the migration path pattern that applies
-     * 
-     * @return string
-     */
-    protected function getMigrationPathPattern()
-    {
-        return with(config('bagpack.path') ?? database_path('migrations'), function ($path) {
-            return $path . "/*";
-        });
     }
 }

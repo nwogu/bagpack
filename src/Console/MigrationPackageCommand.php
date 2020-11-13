@@ -8,17 +8,18 @@ use Nwogu\Bagpack\MigrationTranspiler;
 use Illuminate\Database\Migrations\Migrator;
 use Nwogu\Bagpack\Traits\InteractsWithFiles;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Nwogu\Bagpack\Traits\HandlesMigrationFiles;
 
 class MigrationPackageCommand extends Command
 {
-    use InteractsWithFiles;
+    use InteractsWithFiles, HandlesMigrationFiles;
     
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'migration:package {--p|path=}';
+    protected $signature = 'migration:package {--p|path=} {--r|rollback}';
 
     /**
      * The console command description.
@@ -44,7 +45,21 @@ class MigrationPackageCommand extends Command
      */
     public function handle(MigrationTranspiler $transpiler)
     {
-        $this->getMigrationFiles()->map(function ($path, $name) use ($transpiler) {
+        if ($this->option('rollback')) {
+            return $this->rollback();
+        }
+
+        return $this->package($transpiler);
+    }
+
+    /**
+     * Package migrations
+     * 
+     * @return void
+     */
+    protected function package($transpiler)
+    {
+        $this->getMigrationFiles($this->migrationsPath())->map(function ($path, $name) use ($transpiler) {
 
             $targetPath = $this->getTableMigrationPath($name, $path, $transpiler);
 
@@ -57,15 +72,47 @@ class MigrationPackageCommand extends Command
     }
 
     /**
+     * Rollback packaged migrations
+     * 
+     * @return void
+     */
+    protected function rollback()
+    {
+        $migrationDirectories   = $this->getMigrationFilesRecursively();
+        $migrationsPath         = $this->migrationsPath();
+
+        $this->ensureDirectoryExists($this->laravel->files, $migrationsPath);
+
+        $this->getMigrationFiles($migrationDirectories)->map(function ($path, $name) use ($migrationsPath) {
+
+            $targetPath = "$migrationsPath/$name.php";
+
+            $this->info("Moving $name from $path to $targetPath");
+
+            $this->laravel->files->move($path, $targetPath);
+        });
+
+        $this->laravel->files->deleteDirectories($migrationsPath);
+    }
+
+    /**
      * Get all the migration files paths
      * 
      * @return Illuminate\Support\Collection[string]
      */
-    protected function getMigrationFiles()
+    protected function getMigrationFiles($path)
     {
-        $path = $this->option('path') ?: database_path('migrations');
-
         return collect($this->laravel->migrator->getMigrationFiles($path));
+    }
+
+    /**
+     * Get Migrations Path
+     * 
+     * @return string
+     */
+    protected function migrationsPath()
+    {
+        return $this->option('path') ?: database_path('migrations');
     }
 
     /**
@@ -92,7 +139,7 @@ class MigrationPackageCommand extends Command
 
         $table = $transpiler->for($path)->findTableName();
 
-        $parent = config('bagpack.path') ?: database_path('migrations');
+        $parent = $this->defaultMigrationPath();
 
         return "$parent/$table/$name.php";
     }

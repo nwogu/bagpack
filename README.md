@@ -38,6 +38,14 @@ To package existing migration files into tabled directories, run:
 You can optionally pass a ```--path``` flag to specify a full path to your
 migration directory. Defaults to database/migrations.
 
+## Roll back Packaged Migration Files.
+
+To rollback packaged migration files, run:
+
+```php artisan migration:package --rollback``` 
+
+You can also pass ```-r``` for shorter syntax.
+
 ## Disbaling Bagpack
 
 You can disable bagpack from running by setting ```run``` to false in your config file
